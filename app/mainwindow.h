@@ -4,7 +4,7 @@
 #include <QMainWindow>
 #include <QTimer>
 
-#include "dataset.h"
+#include "dataSource.h"
 
 enum class AppState
 {
@@ -65,7 +65,10 @@ private:
     Ui::MainWindow* ui;
     
     //! Dataset
-    Dataset m_dataset;
+    std::string m_Source1FileName;
+    std::string m_Source2FileName;
+    DataSource m_Source1;
+    DataSource m_Source2;
     AppState m_State;
 };
 

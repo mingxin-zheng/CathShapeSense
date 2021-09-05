@@ -78,7 +78,7 @@ void MainWindow::OpenConfigFile(const QString& fileName)
 		return;
 	}
 	
-    m_dataset.setDatasetPath(resultCSV.toUtf8().constData());
+    m_Source1.SetSourceFilePath(resultCSV.toUtf8().constData());
     bool success = Init();
     if (success)
     {
@@ -88,8 +88,7 @@ void MainWindow::OpenConfigFile(const QString& fileName)
 
 bool MainWindow::Init()
 {
-    m_dataset.clearAll();
-    m_dataset.init();
+    m_Source1.Init();
     ui->sceneWidget->clearAll();
     ui->sceneWidget->init();
 
@@ -132,7 +131,7 @@ bool MainWindow::Step()
 {
 	auto t1 = std::chrono::steady_clock::now();
     std::vector<double> frame;
-    m_dataset.getNextFrame(frame);
+    m_Source1.GetNextFrame(frame);
     ui->sceneWidget->addFrame(frame); // AddFrame: convert the numbers as correct inputs
 	auto t2 = std::chrono::steady_clock::now();
 	auto time_used =

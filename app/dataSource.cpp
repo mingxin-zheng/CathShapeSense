@@ -1,19 +1,36 @@
-#include "dataset.h"
+#include "dataSource.h"
 #include <fstream>
 #include <sstream>
 
-void Dataset::setDatasetPath(std::string fileName)
-{
-    m_DatasetPath = fileName;
-}
+DataSource::DataSource()
+	: m_SourceFilePath("")
+	, m_NumFrames(0)
+	, m_CurrentFrameIndex(0) { }
 
-bool Dataset::init()
+DataSource::~DataSource()
 {
-	std::ifstream file(m_DatasetPath);
+	ClearAll();
+}
+bool DataSource::Init()
+{
+	if (m_SourceFilePath.length() == 0)
+	{
+		return false;
+	}
+
+	std::ifstream file(m_SourceFilePath);
+
+	if (file.fail())
+	{
+		return false;
+	}
+
 	std::string line;
 	int numFrames;
 	const int N = 8;
-
+	
+	m_Tracker.clear();
+	
 	// read the table-format number into a 2D vector
 	for (numFrames = 0; std::getline(file, line); numFrames++)
 	{
@@ -35,13 +52,14 @@ bool Dataset::init()
 	}
 	
 	m_NumFrames = numFrames;
+	m_CurrentFrameIndex = 0;
 
 	file.close();
 
 	return true;
 }
 
-void Dataset::getNextFrame(std::vector<double>& frameData)
+void DataSource::GetNextFrame(std::vector<double>& frameData)
 {
     frameData = m_Tracker[m_CurrentFrameIndex];
 
@@ -53,8 +71,23 @@ void Dataset::getNextFrame(std::vector<double>& frameData)
     }
 }
 
-void Dataset::clearAll()
+void DataSource::SetSourceFilePath(std::string filePath)
 {
+	m_SourceFilePath = filePath;
+	return;
+}
+
+void DataSource::Reset()
+{
+	m_CurrentFrameIndex = 0;
+	return;
+}
+
+void DataSource::ClearAll()
+{
+	m_SourceFilePath = "";
+	m_NumFrames = 0;
+	m_CurrentFrameIndex = 0;
 	m_Tracker.clear();
 	return;
 }
