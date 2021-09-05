@@ -52,3 +52,9 @@ void Dataset::getNextFrame(std::vector<double>& frameData)
         m_CurrentFrameIndex = 0;
     }
 }
+
+void Dataset::clearAll()
+{
+	m_Tracker.clear();
+	return;
+}

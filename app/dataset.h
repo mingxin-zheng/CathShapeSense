@@ -19,6 +19,10 @@ class Dataset {
 		*/
 		void getNextFrame(std::vector<double>& frameData);
 
+        /*!
+
+        */
+        void clearAll();       
     public:
         std::string m_DatasetPath;
 		int m_NumFrames = 0;

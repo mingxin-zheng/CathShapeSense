@@ -68,6 +68,7 @@ void MainWindow::openFile(const QString& fileName)
 
 bool MainWindow::init()
 {
+    m_dataset.clearAll();
     m_dataset.init();
     ui->sceneWidget->clearAll();
     ui->sceneWidget->init();
