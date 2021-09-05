@@ -5,7 +5,7 @@
 #include <vtkDataSet.h>
 #include <vtkRenderer.h>
 #include <vtkSmartPointer.h>
-
+#include <vector>
 #include <vtkParametricFunctionSource.h>
 
 class SceneWidget : public QVTKOpenGLNativeWidget {
@@ -13,27 +13,23 @@ class SceneWidget : public QVTKOpenGLNativeWidget {
 public:
     explicit SceneWidget(QWidget* parent = nullptr);
 
+    void init();
+    
+    //! Remove the data set from the scene
+    void clearAll();
+
     //! Add a data set to the scene
     /*!
-    \param[in] dataSet The data set to add
+        \param[in] dataSet The data set to add
     */
-    void addDataSet(vtkSmartPointer<vtkDataSet> dataSet);
+    void addFrame(std::vector<double>);
 
-    //! Remove the data set from the scene
-    void removeDataSet();
-
-    // todo(mingxin): 
-    // void AddCurrentFrame()
 public slots:
     //! Zoom to the extent of the data set in the scene
     void zoomToExtent();
 
 private:
-    // todo(mingxin):
-    // RenderImage()?
-
     vtkSmartPointer<vtkRenderer> m_renderer;
-	int counter = 0;
 	vtkSmartPointer< vtkParametricFunctionSource> functionSource;
 };
 

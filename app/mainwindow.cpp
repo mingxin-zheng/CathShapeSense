@@ -4,8 +4,11 @@
 #include <QFile>
 #include <QFileDialog>
 #include <QMessageBox>
-
+#include <QTextStream>
 #include <vtkDataSetReader.h>
+#include <QSettings>
+#include <QDebug>
+#include <vector>
 
 MainWindow::MainWindow(QWidget* parent)
     : QMainWindow(parent)
@@ -27,46 +30,66 @@ void MainWindow::showOpenFileDialog()
 {
     // todo(mingxin): read txt for config
     QString fileName = QFileDialog::getOpenFileName(this, tr("Open file"), "",
-        "VTK Files (*.vtk)");
+        "Configuration Files (*.ini)");
 
     // Open file
     QFile file(fileName);
     file.open(QIODevice::ReadOnly);
 
     // Return on Cancel
-    if (!file.exists())
-        return;
+	if (!file.exists())
+	{
+		return;
+	}
 
     openFile(fileName);
 }
 
 void MainWindow::openFile(const QString& fileName)
 {
-    // todo(mingxin): read a text file
-    ui->sceneWidget->removeDataSet();
-
-    // Create reader
-    vtkSmartPointer<vtkDataSetReader> reader = vtkSmartPointer<vtkDataSetReader>::New();
-    reader->SetFileName(fileName.toStdString().c_str());
-
-    // Read the file
-    reader->Update();
-
-    // Add data set to 3D view
-    vtkSmartPointer<vtkDataSet> dataSet = reader->GetOutput();
-    if (dataSet != nullptr) {
-        ui->sceneWidget->addDataSet(reader->GetOutput());
-    }
-
-    // todo(mingxin): if success, run Init()
+    // todo(mingxin): read a text file line by line
+	QSettings settings(QString(fileName), QSettings::IniFormat);
+	QString resultCSV = settings.value("inputs/resultCSV", "").toString();
+	if (resultCSV.length() == 0)
+	{
+		return;
+	}
+	
+	QFile file(resultCSV);
+	file.open(QIODevice::ReadOnly);
+	if (!file.exists())
+	{
+		return;
+	}
+	
+    m_dataset.setDatasetPath(resultCSV.toUtf8().constData());
+    init();
 }
 
-// todo(mingxin)
-/*
-bool MainWindow::Step(){
-    dataset_->NextFrame();
-    frontend_->AddFrame(); // AddFrame: convert the numbers as correct inputs
+bool MainWindow::init()
+{
+    m_dataset.init();
+    ui->sceneWidget->clearAll();
+    ui->sceneWidget->init();
     return true;
 }
 
-*/
+void MainWindow::run()
+{
+	while (1)
+	{
+		if (step() == false)
+		{
+			break;
+		}
+	}
+}
+
+bool MainWindow::step()
+{
+    std::vector<double> frame;
+    m_dataset.getNextFrame(frame);
+    ui->sceneWidget->addFrame(frame); // AddFrame: convert the numbers as correct inputs
+    return false;
+}
+

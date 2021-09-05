@@ -2,6 +2,7 @@
 #define MAINWINDOW_H
 
 #include <QMainWindow>
+#include "dataset.h"
 
 namespace Ui {
 class MainWindow;
@@ -14,6 +15,10 @@ public:
     explicit MainWindow(QWidget* parent = 0);
     ~MainWindow();
 
+	//! Initialize the scene
+	bool init();
+	bool step();
+
 public slots:
     //! Show the 'About this application' dialog
     void showAboutDialog();
@@ -25,9 +30,8 @@ public slots:
      * Make a step forward in dataset
      */
     // todo(mingxin)
-    // bool Init();
-    // void Run();
-    // bool Step();
+    
+    void run();
 
 protected:
     //! Open a file
@@ -41,7 +45,9 @@ private:
     // todo(mingxin)
     // std::string config_file_path_;
     // Frontend::Ptr frontend = nullptr;
-
+    
+    //! Dataset
+    Dataset m_dataset; 
 };
 
 #endif // MAINWINDOW_H
