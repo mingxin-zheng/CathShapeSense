@@ -158,7 +158,7 @@
    <sender>actionOpenFile</sender>
    <signal>triggered()</signal>
    <receiver>MainWindow</receiver>
-   <slot>showOpenFileDialog()</slot>
+   <slot>ShowOpenConfigDialog()</slot>
    <hints>
     <hint type="sourcelabel">
      <x>-1</x>
@@ -206,7 +206,7 @@
    <sender>actionAbout</sender>
    <signal>triggered()</signal>
    <receiver>MainWindow</receiver>
-   <slot>showAboutDialog()</slot>
+   <slot>ShowLicenseDialog()</slot>
    <hints>
     <hint type="sourcelabel">
      <x>-1</x>
@@ -222,7 +222,7 @@
      <sender>actionPlay</sender>
      <signal>triggered()</signal>
      <receiver>MainWindow</receiver>
-     <slot>run()</slot>
+     <slot>Pause()</slot>
      <hints>
        <hint type="sourcelabel">
          <x>-1</x>
@@ -236,7 +236,10 @@
    </connection>
  </connections>
  <slots>
-  <slot>showOpenFileDialog()</slot>
-  <slot>showAboutDialog()</slot>
+  <slot>ShowOpenConfigDialog()</slot>
+  <slot>ShowLicenseDialog()</slot>
+  <slot>Run()</slot>
+  <slot>Pause()</slot>
+  <slot>UpdateGUI()</slot>
  </slots>
 </ui>
