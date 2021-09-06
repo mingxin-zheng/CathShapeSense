@@ -5,6 +5,8 @@
 #include <QTimer>
 
 #include "dataSource.h"
+#include "frontEnd.h"
+#include "backEnd.h"
 
 enum class AppState
 {
@@ -64,6 +66,9 @@ private:
     void SetState(AppState);
     Ui::MainWindow* ui;
     
+    CatheterPoints::Ptr m_CathPts = nullptr;    
+    BackEnd::Ptr m_BackEnd = nullptr;
+
     //! Dataset
     std::string m_Source1FileName;
     std::string m_Source2FileName;

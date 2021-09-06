@@ -23,7 +23,9 @@ MainWindow::MainWindow(QWidget* parent)
 }
 
 MainWindow::~MainWindow() 
-{ 
+{
+	m_BackEnd->Stop();
+
 	if (m_UiRefreshTimer != NULL)
 	{
 		m_UiRefreshTimer->stop();
@@ -97,8 +99,14 @@ bool MainWindow::Init()
     m_Source1.Init();
 	m_Source2.Init();
 
-    ui->frontEnd->ClearAll();
-    ui->frontEnd->Init();
+	ui->frontEnd->ClearAll();
+	ui->frontEnd->Init();
+
+	m_CathPts = CatheterPoints::Ptr(new CatheterPoints);
+	m_BackEnd = BackEnd::Ptr(new BackEnd);
+
+	ui->frontEnd->SetCatheterPoints(m_CathPts);
+	ui->frontEnd->SetBackEnd(m_BackEnd);
 
 	// Set up timer for refreshing UI
 	if (m_UiRefreshTimer != NULL)

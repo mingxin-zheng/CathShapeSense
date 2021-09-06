@@ -25,6 +25,8 @@
 #include <vtkRenderWindow.h>
 #include <vtkRenderer.h>
 
+#include "backEnd.h"
+
 // CURVE_FITTING_COST_1_COMMENT
 struct CURVE_FITTING_COST_1
 {
@@ -180,9 +182,9 @@ void FrontEnd::AddFrame(std::vector<double> tracker1, std::vector<double> tracke
 	for (int i = 0; i < m_NumPointSimualation + 2; i++)
 	{
 		int x = i * 3, y = 3 * i + 1, z = 3 * i + 2;
-		points->InsertPoint(i,	m_OptimalFit[x] * 0.5,
-								m_OptimalFit[y] * 0.5,
-								m_OptimalFit[z] * 0.5);
+		points->InsertPoint(i,	m_OptimalFit[x] ,
+								m_OptimalFit[y],
+								m_OptimalFit[z]);
 	}
 	
 	// Fit a spline to the points
