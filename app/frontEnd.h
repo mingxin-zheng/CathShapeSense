@@ -1,5 +1,5 @@
-#ifndef SCENEWIDGET_H
-#define SCENEWIDGET_H
+#ifndef FRONTEND_H
+#define FRONTEND_H
 
 #include <QVTKOpenGLNativeWidget.h>
 #include <vtkDataSet.h>
@@ -8,25 +8,25 @@
 #include <vector>
 #include <vtkParametricFunctionSource.h>
 
-class SceneWidget : public QVTKOpenGLNativeWidget {
+class FrontEnd : public QVTKOpenGLNativeWidget {
     Q_OBJECT
 public:
-    explicit SceneWidget(QWidget* parent = nullptr);
+    explicit FrontEnd(QWidget* parent = nullptr);
 
-    void init();
+    void Init();
     
     //! Remove the data set from the scene
-    void clearAll();
+    void ClearAll();
 
     //! Add a data set to the scene
     /*!
         \param[in] tracker1, tracker2 
     */
-    void addFrame(std::vector<double> tracker1, std::vector<double> tracker2);
+    void AddFrame(std::vector<double> tracker1, std::vector<double> tracker2);
 
 public slots:
     //! Zoom to the extent of the data set in the scene
-    void zoomToExtent();
+    void ZoomToExtent();
 
 private:
 	/*!
@@ -40,4 +40,4 @@ private:
     double* lastOptimalPoints;
 };
 
-#endif // SCENEWIDGET_H
+#endif // FRONTEND_H

@@ -31,7 +31,7 @@
      <number>0</number>
     </property>
     <item row="0" column="0">
-     <widget class="SceneWidget" name="sceneWidget"/>
+     <widget class="FrontEnd" name="frontEnd"/>
     </item>
    </layout>
   </widget>
@@ -142,11 +142,11 @@
  </widget>
  <customwidgets>
   <customwidget>
-   <class>SceneWidget</class>
+   <class>FrontEnd</class>
    <extends>QOpenGLWidget</extends>
-   <header>scenewidget.h</header>
+   <header>frontEnd.h</header>
    <slots>
-    <slot>zoomToExtent()</slot>
+    <slot>ZoomToExtent()</slot>
    </slots>
   </customwidget>
  </customwidgets>
@@ -189,8 +189,8 @@
   <connection>
    <sender>actionZoomToExtent</sender>
    <signal>triggered()</signal>
-   <receiver>sceneWidget</receiver>
-   <slot>zoomToExtent()</slot>
+   <receiver>frontEnd</receiver>
+   <slot>ZoomToExtent()</slot>
    <hints>
     <hint type="sourcelabel">
      <x>-1</x>

@@ -1,7 +1,7 @@
 #define _DISABLE_EXTENDED_ALIGNED_STORAGE
 #define NOGDI
 
-#include "scenewidget.h"
+#include "frontEnd.h"
 
 #include <ceres/ceres.h>
 
@@ -84,7 +84,7 @@ struct CURVE_FITTING_COST_1
 	const int _N, _funcID;
 };
 
-SceneWidget::SceneWidget(QWidget* parent)
+FrontEnd::FrontEnd(QWidget* parent)
     : QVTKOpenGLNativeWidget(parent)
 	, m_NumPointSimualation(6)
 	, lastOptimalPoints(NULL)
@@ -106,7 +106,7 @@ SceneWidget::SceneWidget(QWidget* parent)
 	functionSource = vtkSmartPointer<vtkParametricFunctionSource>::New();
 }
 
-void SceneWidget::init()
+void FrontEnd::Init()
 {
 	auto tubePolyData = functionSource->GetOutput();
 
@@ -148,7 +148,7 @@ void SceneWidget::init()
 }
 
 
-void SceneWidget::clearAll()
+void FrontEnd::ClearAll()
 {
 	// note(mingxin): Only ONE actor in the scene
     vtkActor* actor = m_renderer->GetActors()->GetLastActor();
@@ -159,7 +159,7 @@ void SceneWidget::clearAll()
     renderWindow()->Render();
 }
 
-void SceneWidget::zoomToExtent()
+void FrontEnd::ZoomToExtent()
 {
     // Zoom to extent of last added actor
     vtkSmartPointer<vtkActor> actor = m_renderer->GetActors()->GetLastActor();
@@ -171,7 +171,7 @@ void SceneWidget::zoomToExtent()
     renderWindow()->Render();
 }
 
-void SceneWidget::addFrame(std::vector<double> tracker1, std::vector<double> tracker2)
+void FrontEnd::AddFrame(std::vector<double> tracker1, std::vector<double> tracker2)
 {
 	Solve(tracker1, tracker2);
 	
@@ -196,7 +196,7 @@ void SceneWidget::addFrame(std::vector<double> tracker1, std::vector<double> tra
 	renderWindow()->Render();
 }
 
-void SceneWidget::Solve(std::vector<double> tracker1, std::vector<double> tracker2)
+void FrontEnd::Solve(std::vector<double> tracker1, std::vector<double> tracker2)
 {
 
 	double xMean = 0.5*(tracker1[0] + tracker2[0]);

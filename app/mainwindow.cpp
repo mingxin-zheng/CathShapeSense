@@ -97,8 +97,8 @@ bool MainWindow::Init()
     m_Source1.Init();
 	m_Source2.Init();
 
-    ui->sceneWidget->clearAll();
-    ui->sceneWidget->init();
+    ui->frontEnd->ClearAll();
+    ui->frontEnd->Init();
 
 	// Set up timer for refreshing UI
 	if (m_UiRefreshTimer != NULL)
@@ -144,7 +144,7 @@ bool MainWindow::Step()
 	m_Source2.GetNextFrame(tracker2);
 	
 	// AddFrame: convert the numbers as correct inputs
-    ui->sceneWidget->addFrame(tracker1, tracker2); 
+    ui->frontEnd->AddFrame(tracker1, tracker2); 
 	
 	auto t2 = std::chrono::steady_clock::now();
 	auto time_used =
