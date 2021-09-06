@@ -36,7 +36,10 @@ find_package(VTK
         RenderingOpenGL2
   )
 
-# Find package CERES
+# Find package EIGEN
+find_package(Eigen3 REQUIRED)
+
+# Find package Ceres Solver 
 find_package( Ceres REQUIRED )
 
 add_subdirectory(app)

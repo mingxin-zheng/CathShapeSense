@@ -34,6 +34,11 @@ class DataSource {
         void ClearAll(); 
 
     public:
+		/*!
+
+		*/
+		void	XYZQuatToTransformation(std::vector<double> XYZQuat, std::vector<double> &posVec);
+
         std::string                         m_SourceFilePath;
 		int                                 m_NumFrames = 0;
         int                                 m_CurrentFrameIndex = 0;

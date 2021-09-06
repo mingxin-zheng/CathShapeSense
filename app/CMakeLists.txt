@@ -6,6 +6,7 @@ file (GLOB Headers *.h)
 file (GLOB Resources *.qrc)
 file (GLOB UIs *.ui)
 
+include_directories( ${EIGEN3_INCLUDE_DIRS} )
 include_directories( ${CERES_INCLUDE_DIRS} )
 
 # Build executable

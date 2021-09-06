@@ -150,7 +150,7 @@ bool MainWindow::Step()
 	auto time_used =
 		std::chrono::duration_cast<std::chrono::duration<double>>(t2 - t1);
 	
-	qDebug() << "Time elapsed: " << time_used.count() << " seconds.";
+	qDebug() << "Instant Frame Rate: " << 1.0/time_used.count() << " Hz";
 
     return false;
 }
