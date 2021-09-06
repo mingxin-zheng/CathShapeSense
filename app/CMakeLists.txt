@@ -6,10 +6,13 @@ file (GLOB Headers *.h)
 file (GLOB Resources *.qrc)
 file (GLOB UIs *.ui)
 
+include_directories( ${CERES_INCLUDE_DIRS} )
+
 # Build executable
 add_executable(QtVtkViewer WIN32 ${Sources} ${Headers} ${Resources} ${UIs})
 
-target_link_libraries(QtVtkViewer PRIVATE Qt5::Widgets Qt5::OpenGL VTK::GUISupportQt VTK::IOLegacy ${VTK_LIBRARIES})
+target_link_libraries(QtVtkViewer PRIVATE 
+        Qt5::Widgets Qt5::OpenGL VTK::GUISupportQt VTK::IOLegacy ${VTK_LIBRARIES} ${CERES_LIBRARIES})
 
 vtk_module_autoinit(
     TARGETS QtVtkViewer

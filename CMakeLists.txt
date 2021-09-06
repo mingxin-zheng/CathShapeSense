@@ -38,7 +38,6 @@ find_package(VTK
 
 # Find package CERES
 find_package( Ceres REQUIRED )
-include_directories( ${CERES_INCLUDE_DIRS} )
 
 add_subdirectory(app)
 

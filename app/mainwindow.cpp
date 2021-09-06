@@ -64,23 +64,29 @@ void MainWindow::OpenConfigFile(const QString& fileName)
 {
     // Read a config file before initialization
 	QSettings settings(QString(fileName), QSettings::IniFormat);
-	QString resultCSV = settings.value("inputs/resultCSV", "").toString();
+	QString src1 = settings.value("DataSources/Aurora1", "").toString();
+	QString src2 = settings.value("DataSources/Aurora2", "").toString();
 
-	if (resultCSV.length() == 0)
+	if (src1.length() == 0 || src2.length() == 0)
 	{
 		return;
 	}
 	
-	QFile file(resultCSV);
-	file.open(QIODevice::ReadOnly);
-	if (!file.exists())
+	QFile srcFile1(src1), srcFile2(src2);
+	srcFile1.open(QIODevice::ReadOnly);
+	srcFile2.open(QIODevice::ReadOnly);
+
+	if (!srcFile1.exists() || !srcFile2.exists()) 
 	{
 		return;
 	}
 	
-    m_Source1.SetSourceFilePath(resultCSV.toUtf8().constData());
+    m_Source1.SetSourceFilePath(src1.toUtf8().constData());
+	m_Source2.SetSourceFilePath(src2.toUtf8().constData());
+
     bool success = Init();
-    if (success)
+    
+	if (success)
     {
         SetState(AppState::AppState_Idle);
     }
@@ -89,6 +95,8 @@ void MainWindow::OpenConfigFile(const QString& fileName)
 bool MainWindow::Init()
 {
     m_Source1.Init();
+	m_Source2.Init();
+
     ui->sceneWidget->clearAll();
     ui->sceneWidget->init();
 
@@ -130,9 +138,14 @@ void MainWindow::UpdateGUI()
 bool MainWindow::Step()
 {
 	auto t1 = std::chrono::steady_clock::now();
-    std::vector<double> frame;
-    m_Source1.GetNextFrame(frame);
-    ui->sceneWidget->addFrame(frame); // AddFrame: convert the numbers as correct inputs
+    
+	std::vector<double> tracker1, tracker2;
+    m_Source1.GetNextFrame(tracker1);
+	m_Source2.GetNextFrame(tracker2);
+	
+	// AddFrame: convert the numbers as correct inputs
+    ui->sceneWidget->addFrame(tracker1, tracker2); 
+	
 	auto t2 = std::chrono::steady_clock::now();
 	auto time_used =
 		std::chrono::duration_cast<std::chrono::duration<double>>(t2 - t1);

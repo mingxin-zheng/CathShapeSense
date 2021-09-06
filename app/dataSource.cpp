@@ -27,10 +27,10 @@ bool DataSource::Init()
 
 	std::string line;
 	int numFrames;
-	const int N = 8;
+	const int N = 6;
 	
 	m_Tracker.clear();
-	
+
 	// read the table-format number into a 2D vector
 	for (numFrames = 0; std::getline(file, line); numFrames++)
 	{
@@ -44,7 +44,7 @@ bool DataSource::Init()
 				ss.ignore();
 			}
 		}
-		if (lineData.size() != N * 3)
+		if (lineData.size() != N)
 		{
 			return false;
 		}
