@@ -47,10 +47,14 @@ private:
 	//! determine if the current frame is key frame, which will be used for optimization
 	bool IsKeyFrame();
 
-	int		m_NumPointSimualation = 6;	// number of points used for simulation, not including the ends measured by sensor For example, if 6 points are used, in total there are 6+2 points
-	int		m_KeyFrameInterval = 1;		// if the ptimization is taking a long time, only points in the key frame will be used for the optimization
+	int		m_NumPointSimualation = 6;	// number of points used for simulation, not including the ends 
+										// measured by sensor For example, if 6 points are used, 
+										// in total there are 6+2 points
+	int		m_KeyFrameInterval = 1;		// if the ptimization is taking a long time, only points in the 
+										// key frame will be used for the optimization
 	int		m_KeyFrameCounter = 1;		// counter to support IsKeyFrame()
-	bool	m_FirstTimeDisplay = true;	// if the object is displayed for the first time, apply auto zoom to focus on the object. Default true (do it for the next run)
+	bool	m_FirstTimeDisplay = true;	// if the object is displayed for the first time, apply auto zoom to 
+										// focus on the object. Default true (do it for the next run)
 	CatheterPoints::Ptr		m_CathPts = nullptr;
 	BackEnd::Ptr			m_BackEnd = nullptr;
     vtkSmartPointer<vtkRenderer>					m_renderer;

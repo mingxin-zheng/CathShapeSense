@@ -5,10 +5,14 @@
 #include <ceres/ceres.h>
 #include <chrono>
 
-struct CURVE_FITTING_COST_1
+struct CATH_FITTING_COST
 {
-	CURVE_FITTING_COST_1(double x0, double y0, double z0, double mx0, double my0, double mz0, double x7, double y7, double z7, double mx7, double my7, double mz7, int N, int funcID) :
-		_x0(x0), _y0(y0), _z0(z0), _mx0(mx0), _my0(my0), _mz0(mz0), _x7(x7), _y7(y7), _z7(z7), _mx7(mx7), _my7(my7), _mz7(mz7), _N(N), _funcID(funcID) {}
+	CATH_FITTING_COST(	double x0, double y0, double z0, double mx0, double my0, double mz0, 
+						double x7, double y7, double z7, double mx7, double my7, double mz7, 
+						int N, int funcID) :
+						_x0(x0), _y0(y0), _z0(z0), _mx0(mx0), _my0(my0), _mz0(mz0), 
+						_x7(x7), _y7(y7), _z7(z7), _mx7(mx7), _my7(my7), _mz7(mz7), 
+						_N(N), _funcID(funcID) {}
 	// residual/cost compuation 
 	template <typename T> bool operator() (const T* const a, T* residual) const
 	{
@@ -142,18 +146,30 @@ std::vector<double> BackEnd::Optimize(std::vector<double> tracker1, std::vector<
 	{
 		if (m_NumPointSimualation == (int) SimulationDensity::LOW)
 		{
-			problem.AddResidualBlock(new ceres::AutoDiffCostFunction<CURVE_FITTING_COST_1, 1, ((int) SimulationDensity::LOW) * 3>(
-				new CURVE_FITTING_COST_1(x1, y1, z1, mx1, my1, mz1, x2, y2, z2, mx2, my2, mz2, m_NumPointSimualation, i)), nullptr, lastOptimalPoints);
+			problem.AddResidualBlock(
+				new ceres::AutoDiffCostFunction<CATH_FITTING_COST, 1, ((int) SimulationDensity::LOW) * 3>
+					(new CATH_FITTING_COST(	x1, y1, z1, mx1, my1, mz1, 
+												x2, y2, z2, mx2, my2, mz2, 
+												m_NumPointSimualation, i)
+					), nullptr, lastOptimalPoints);
 		}
 		else if (m_NumPointSimualation == (int)SimulationDensity::MEDIUM)
 		{
-			problem.AddResidualBlock(new ceres::AutoDiffCostFunction<CURVE_FITTING_COST_1, 1, ((int)SimulationDensity::MEDIUM) * 3>(
-				new CURVE_FITTING_COST_1(x1, y1, z1, mx1, my1, mz1, x2, y2, z2, mx2, my2, mz2, m_NumPointSimualation, i)), nullptr, lastOptimalPoints);
+			problem.AddResidualBlock(
+				new ceres::AutoDiffCostFunction<CATH_FITTING_COST, 1, ((int)SimulationDensity::MEDIUM) * 3>
+					(new CATH_FITTING_COST(	x1, y1, z1, mx1, my1, mz1, 
+												x2, y2, z2, mx2, my2, mz2, 
+												m_NumPointSimualation, i)
+					), nullptr, lastOptimalPoints);
 		}
 		else if (m_NumPointSimualation == (int)SimulationDensity::HIGH)
 		{
-			problem.AddResidualBlock(new ceres::AutoDiffCostFunction<CURVE_FITTING_COST_1, 1, ((int)SimulationDensity::HIGH) * 3>(
-				new CURVE_FITTING_COST_1(x1, y1, z1, mx1, my1, mz1, x2, y2, z2, mx2, my2, mz2, m_NumPointSimualation, i)), nullptr, lastOptimalPoints);
+			problem.AddResidualBlock(
+				new ceres::AutoDiffCostFunction<CATH_FITTING_COST, 1, ((int)SimulationDensity::HIGH) * 3>
+					(new CATH_FITTING_COST(	x1, y1, z1, mx1, my1, mz1, 
+												x2, y2, z2, mx2, my2, mz2, 
+												m_NumPointSimualation, i)
+					), nullptr, lastOptimalPoints);
 		}
 	}
 
