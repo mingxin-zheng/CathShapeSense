@@ -9,7 +9,7 @@ struct CURVE_FITTING_COST_1
 {
 	CURVE_FITTING_COST_1(double x0, double y0, double z0, double mx0, double my0, double mz0, double x7, double y7, double z7, double mx7, double my7, double mz7, int N, int funcID) :
 		_x0(x0), _y0(y0), _z0(z0), _mx0(mx0), _my0(my0), _mz0(mz0), _x7(x7), _y7(y7), _z7(z7), _mx7(mx7), _my7(my7), _mz7(mz7), _N(N), _funcID(funcID) {}
-	// 残差的计算
+	// residual/cost compuation 
 	template <typename T> bool operator() (const T* const a, T* residual) const
 	{
 		double L = 1.0 / (_N + 1);
@@ -63,10 +63,13 @@ struct CURVE_FITTING_COST_1
 	const int _N, _funcID;
 };
 
-BackEnd::BackEnd()
+BackEnd::BackEnd(int numPointSimualation, double cathLength)
+	: m_NumPointSimualation(numPointSimualation)
+	, m_CatheterLengthInMM(cathLength)
 {
 	lastOptimalPoints = new double[m_NumPointSimualation * 3];
 
+	// custom way to give the initial value to Ceres. Make sure non-zero gradient between all the points
 	for (int i = 0; i < m_NumPointSimualation * 3; i++)
 	{
 		lastOptimalPoints[i] = 0.1 + 0.04*i;
@@ -96,7 +99,7 @@ void BackEnd::BackEndLoop()
         std::unique_lock<std::mutex> lock(m_DataMutex);
         m_PointUpdate.wait(lock);
 
-        // 后端仅优化
+        // Optimize in the back end
 		std::vector<double> tracker1 = m_CathPts->GetTracker1();
 		std::vector<double> tracker2 = m_CathPts->GetTracker2();
 		std::vector<double> optimalResult;
@@ -114,12 +117,12 @@ std::vector<double> BackEnd::Optimize(std::vector<double> tracker1, std::vector<
 
 	// location(x,y,z) of tracker 1 and 2
 	double x1, y1, z1, x2, y2, z2;
-	x1 = (tracker1[0] - xMean) / 100.0;
-	y1 = (tracker1[1] - yMean) / 100.0;
-	z1 = (tracker1[2] - zMean) / 100.0;
-	x2 = (tracker2[0] - xMean) / 100.0;
-	y2 = (tracker2[1] - yMean) / 100.0;
-	z2 = (tracker2[2] - zMean) / 100.0;
+	x1 = (tracker1[0] - xMean) / m_CatheterLengthInMM;
+	y1 = (tracker1[1] - yMean) / m_CatheterLengthInMM;
+	z1 = (tracker1[2] - zMean) / m_CatheterLengthInMM;
+	x2 = (tracker2[0] - xMean) / m_CatheterLengthInMM;
+	y2 = (tracker2[1] - yMean) / m_CatheterLengthInMM;
+	z2 = (tracker2[2] - zMean) / m_CatheterLengthInMM;
 
 	// tagent vector (mx, my, mz) of tracker 1 and 2
 	double mx1, my1, mz1, mx2, my2, mz2;
@@ -137,8 +140,21 @@ std::vector<double> BackEnd::Optimize(std::vector<double> tracker1, std::vector<
 
 	for (int i = 0; i <= 2 * m_NumPointSimualation + 6; i++)
 	{
-		problem.AddResidualBlock(new ceres::AutoDiffCostFunction<CURVE_FITTING_COST_1, 1, 6 * 3>(
-			new CURVE_FITTING_COST_1(x1, y1, z1, mx1, my1, mz1, x2, y2, z2, mx2, my2, mz2, 6, i)), nullptr, lastOptimalPoints);
+		if (m_NumPointSimualation == (int) SimulationDensity::LOW)
+		{
+			problem.AddResidualBlock(new ceres::AutoDiffCostFunction<CURVE_FITTING_COST_1, 1, ((int) SimulationDensity::LOW) * 3>(
+				new CURVE_FITTING_COST_1(x1, y1, z1, mx1, my1, mz1, x2, y2, z2, mx2, my2, mz2, m_NumPointSimualation, i)), nullptr, lastOptimalPoints);
+		}
+		else if (m_NumPointSimualation == (int)SimulationDensity::MEDIUM)
+		{
+			problem.AddResidualBlock(new ceres::AutoDiffCostFunction<CURVE_FITTING_COST_1, 1, ((int)SimulationDensity::MEDIUM) * 3>(
+				new CURVE_FITTING_COST_1(x1, y1, z1, mx1, my1, mz1, x2, y2, z2, mx2, my2, mz2, m_NumPointSimualation, i)), nullptr, lastOptimalPoints);
+		}
+		else if (m_NumPointSimualation == (int)SimulationDensity::HIGH)
+		{
+			problem.AddResidualBlock(new ceres::AutoDiffCostFunction<CURVE_FITTING_COST_1, 1, ((int)SimulationDensity::HIGH) * 3>(
+				new CURVE_FITTING_COST_1(x1, y1, z1, mx1, my1, mz1, x2, y2, z2, mx2, my2, mz2, m_NumPointSimualation, i)), nullptr, lastOptimalPoints);
+		}
 	}
 
 	ceres::Solver::Options options;
@@ -153,9 +169,9 @@ std::vector<double> BackEnd::Optimize(std::vector<double> tracker1, std::vector<
 
 	for (int i = 0; i < m_NumPointSimualation; i++)
 	{
-		optimalFit.push_back(lastOptimalPoints[i * 3 + 0] * 100 + xMean);
-		optimalFit.push_back(lastOptimalPoints[i * 3 + 1] * 100 + yMean);
-		optimalFit.push_back(lastOptimalPoints[i * 3 + 2] * 100 + zMean);
+		optimalFit.push_back(lastOptimalPoints[i * 3 + 0] * m_CatheterLengthInMM + xMean);
+		optimalFit.push_back(lastOptimalPoints[i * 3 + 1] * m_CatheterLengthInMM + yMean);
+		optimalFit.push_back(lastOptimalPoints[i * 3 + 2] * m_CatheterLengthInMM + zMean);
 	}
 
 	return optimalFit;

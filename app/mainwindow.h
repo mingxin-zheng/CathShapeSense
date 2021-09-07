@@ -7,6 +7,7 @@
 #include "dataSource.h"
 #include "frontEnd.h"
 #include "backEnd.h"
+#include <chrono>
 
 enum class AppState
 {
@@ -14,6 +15,8 @@ enum class AppState
     AppState_Idle, 
     AppState_Running
 };
+
+enum class SimulationDensity;
 
 namespace Ui {
 class MainWindow;
@@ -61,16 +64,21 @@ private:
 
 	Ui::MainWindow*		ui;						//Main UI
 	QTimer*				m_UiRefreshTimer;		// Timer that refreshes the UI
-    CatheterPoints::Ptr m_CathPts = nullptr;	// Catheter point class
+    
+	CatheterPoints::Ptr m_CathPts = nullptr;	// Catheter point class
     BackEnd::Ptr		m_BackEnd = nullptr;	// Backend optimizer    
-    std::string			m_Source1FileName;		// Dataset 1 filename
+    
+	std::string			m_Source1FileName;		// Dataset 1 filename
     std::string			m_Source2FileName;		// Dataset 2 filename
-    DataSource			m_Source1;				// Fake data source 1
+	DataSource			m_Source1;				// Fake data source 1
     DataSource			m_Source2;				// Fake data source 2
-    AppState			m_State;				// Internal state of the system
+	
 	int					m_FrameRate = 30;			// frame rate of the system, default 30 Hz
 	int					m_KeyFrameInterval = 1;		// front end parameter
-	int					m_NumPointSimualation = 6;	// front end and back end parameter
+	int					m_CatheterLengthInMM = 100; // length of the catheter (Unit: mm)
+
+	AppState			m_State = AppState::AppState_Unitialized;		// Internal state of the system
+	SimulationDensity	m_NumPointSimualation = SimulationDensity::LOW;	// front end and back end parameter
 };
 
 #endif // MAINWINDOW_H

@@ -1,9 +1,4 @@
-//#define _DISABLE_EXTENDED_ALIGNED_STORAGE
-//#define NOGDI
-
 #include "frontEnd.h"
-
-//#include <ceres/ceres.h>
 
 #include <vtkCamera.h>
 #include <vtkDataSetMapper.h>
@@ -25,12 +20,6 @@
 #include <vtkRenderWindow.h>
 #include <vtkRenderer.h>
 
-#include "backEnd.h"
-
-#include <chrono>
-//todo(mingxin): remove the debug
-#include <QDebug>
-
 FrontEnd::FrontEnd(QWidget* parent)
     : QVTKOpenGLNativeWidget(parent)
 {
@@ -47,12 +36,13 @@ FrontEnd::FrontEnd(QWidget* parent)
     m_renderer->SetActiveCamera(camera);
     m_renderer->SetBackground(0.5, 0.5, 0.5);
     renderWindow()->AddRenderer(m_renderer);
-
+	// spline function
 	functionSource = vtkSmartPointer<vtkParametricFunctionSource>::New();
 }
 
 void FrontEnd::Init()
 {
+	// tube data
 	auto tubePolyData = functionSource->GetOutput();
 
 	vtkNew<vtkTubeFilter> tuber;
@@ -60,8 +50,6 @@ void FrontEnd::Init()
 	tuber->SetNumberOfSides(20);
 	tuber->SetRadius(1);
 
-	//--------------
-	// Create the tubes
 	// Setup actors and mappers
 	vtkNew<vtkPolyDataMapper> tubeMapper;
 	tubeMapper->SetInputConnection(tuber->GetOutputPort());
@@ -77,17 +65,17 @@ void FrontEnd::Init()
 	m_renderer->UseHiddenLineRemovalOn();
 	m_renderer->AddActor(tubeActor);
 	m_renderer->SetBackground(colors->GetColor3d("SlateGray").GetData());
-
 }
 
 
 void FrontEnd::ClearAll()
 {
-	// note(mingxin): Only ONE actor in the scene
+	// clear the only actor in the scene
     vtkActor* actor = m_renderer->GetActors()->GetLastActor();
     if (actor != nullptr) {
        m_renderer->RemoveActor(actor);
     }
+
 	m_FirstTimeDisplay = true;
     renderWindow()->Render();
 }
@@ -106,7 +94,7 @@ void FrontEnd::ZoomToExtent()
 
 void FrontEnd::AddFrame()
 {
-	auto t1 = std::chrono::steady_clock::now();
+	// if it is the key frame, ask the back end to find the optimized solution of catheter shape points
 	if (IsKeyFrame())
 	{
 		m_BackEnd->UpdateAllPoints();
@@ -116,6 +104,7 @@ void FrontEnd::AddFrame()
 
 	if (optimalFit.size() > 0)
 	{
+		// update the tube vtk display
 		std::vector<double> tracker1 = m_CathPts->GetTracker1();
 		std::vector<double> tracker2 = m_CathPts->GetTracker2();
 
@@ -144,18 +133,12 @@ void FrontEnd::AddFrame()
 			ZoomToExtent();
 			m_FirstTimeDisplay = false;
 		}
-
 	}
-
-	auto t2 = std::chrono::steady_clock::now();
-	auto time_used =
-		std::chrono::duration_cast<std::chrono::duration<double>>(t2 - t1);
-
-	qDebug() << "Time Elasped for BackEnd " << time_used.count() << " secs";
 }
 
 bool FrontEnd::IsKeyFrame()
 {
+	// pick a key frame every N frames. N = m_KeyFrameInterval
 	bool success = (m_KeyFrameCounter == 0);
 	m_KeyFrameCounter--;
 	if (m_KeyFrameCounter < 0)

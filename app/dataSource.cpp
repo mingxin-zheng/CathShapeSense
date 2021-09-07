@@ -7,15 +7,17 @@
 
 DataSource::DataSource()
 	: m_SourceFilePath("")
-	, m_NumFrames(0)
-	, m_CurrentFrameIndex(0) { }
+{
+}
 
 DataSource::~DataSource()
 {
 	ClearAll();
 }
+
 bool DataSource::Init()
 {
+	// check file existence
 	if (m_SourceFilePath.length() == 0)
 	{
 		return false;
@@ -73,8 +75,8 @@ void DataSource::XYZQuatToTransformation(std::vector<double> XYZQuat, std::vecto
 	Eigen::Quaterniond q(XYZQuat[3], XYZQuat[4], XYZQuat[5], XYZQuat[6]);
 	Eigen::Matrix3d R = q.toRotationMatrix();
 
-	Eigen::Matrix4d Trans; // Your Transformation Matrix
-	Trans.setIdentity();   // Set to Identity to make bottom row of Matrix 0,0,0,1
+	Eigen::Matrix4d Trans; // Transformation Matrix
+	Trans.setIdentity(); 
 	Trans.block<3, 3>(0, 0) = R;
 	Trans.block<3, 1>(0, 3) = T;
 	
@@ -97,7 +99,7 @@ void DataSource::GetNextFrame(std::vector<double>& frameData)
 {
     frameData = m_Tracker[m_CurrentFrameIndex];
 
-    m_CurrentFrameIndex ++;
+    m_CurrentFrameIndex++;
 
     if (m_CurrentFrameIndex >= m_NumFrames)
     {

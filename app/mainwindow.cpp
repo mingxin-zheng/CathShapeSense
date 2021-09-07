@@ -9,7 +9,6 @@
 #include <QTextStream>
 #include <QSettings>
 
-#include <chrono>
 //todo(mingxin): remove the debug
 #include <QDebug>
 
@@ -92,8 +91,26 @@ void MainWindow::OpenConfigFile(const QString& fileName)
 	m_Source2.SetSourceFilePath(src2.toUtf8().constData());
 
 	m_FrameRate = settings.value("FrontEnd/FrameRate", 30).toInt();
-	m_KeyFrameInterval = settings.value("FrontEnd/KeyFrameInteval", 1).toInt();
-	m_NumPointSimualation = settings.value("FrontEnd/NumPointSimualation", 6).toInt();
+	m_KeyFrameInterval = settings.value("FrontEnd/KeyFrameInterval", 1).toInt();
+	m_CatheterLengthInMM = settings.value("BackEnd/CatheterLengthInMM", 100).toInt();
+
+	int pSim = settings.value("FrontEnd/NumPointSimualation(1:Low 2:Med 3:High)", 1).toInt();
+	if (pSim == 1)
+	{
+		m_NumPointSimualation = SimulationDensity::LOW;
+	}
+	else if (pSim == 2)
+	{
+		m_NumPointSimualation = SimulationDensity::MEDIUM;
+	}
+	else if (pSim == 3)
+	{
+		m_NumPointSimualation = SimulationDensity::HIGH;
+	}
+	else // DEFAULT to LOW
+	{
+		m_NumPointSimualation = SimulationDensity::LOW;
+	}
 
     bool success = Init();
     
@@ -105,19 +122,27 @@ void MainWindow::OpenConfigFile(const QString& fileName)
 
 bool MainWindow::Init()
 {
+	// stop the previous back end if it exists
+	if (m_BackEnd != NULL)
+	{
+		m_BackEnd->Stop();
+	}
+
 	m_CathPts = CatheterPoints::Ptr(new CatheterPoints);
-	m_BackEnd = BackEnd::Ptr(new BackEnd);
+	m_BackEnd = BackEnd::Ptr(new BackEnd((int) m_NumPointSimualation, (double) m_CatheterLengthInMM));
 
 	m_Source1.Init();
 	m_Source2.Init();
 
+	// set up the front end
 	ui->frontEnd->ClearAll();
 	ui->frontEnd->SetCatheterPoints(m_CathPts);
 	ui->frontEnd->SetBackEnd(m_BackEnd);
 	ui->frontEnd->SetKeyFrameInterval(m_KeyFrameInterval);
-	ui->frontEnd->SetNumPointSimualation(m_NumPointSimualation);
+	ui->frontEnd->SetNumPointSimualation((int) m_NumPointSimualation);
 	ui->frontEnd->Init();
 
+	// back end set up
 	m_BackEnd->SetCatheterPoints(m_CathPts);
 
 	// Set up timer for refreshing UI
@@ -132,7 +157,7 @@ bool MainWindow::Init()
 	connect(m_UiRefreshTimer, SIGNAL(timeout()), this, SLOT(UpdateGUI()));
 
 	// Start Timer at interval of 50ms
-	int interval = 1.0 / ((double) m_FrameRate);
+	int interval = 1000.0 / ((double) m_FrameRate);
 	m_UiRefreshTimer->start(interval);
     return true;
 }
@@ -160,22 +185,22 @@ bool MainWindow::Step()
 {
 	auto t1 = std::chrono::steady_clock::now();
     
+	// fetch the sensor data for the next frame
 	std::vector<double> tracker1, tracker2;
     m_Source1.GetNextFrame(tracker1);
 	m_Source2.GetNextFrame(tracker2);
-	
+	// update the catheter point (just the ends) based on the sensor locations
 	m_CathPts->SetSensor1(tracker1);
 	m_CathPts->SetSensor2(tracker2);
 
-	// AddFrame: convert the numbers as correct inputs
+	// update the front end display
     ui->frontEnd->AddFrame(); 
 
 	auto t2 = std::chrono::steady_clock::now();
 	auto time_used =
 		std::chrono::duration_cast<std::chrono::duration<double>>(t2 - t1);
 	
-	// qDebug() << "Instant Frame Rate: " << 1.0/time_used.count() << " Hz";
-
+	qDebug() << "Instant Frame Rate: " << 1.0/time_used.count() << " Hz";
     return false;
 }
 
