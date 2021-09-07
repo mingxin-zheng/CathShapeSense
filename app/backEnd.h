@@ -7,7 +7,7 @@
 #include <mutex>
 #include <atomic>
 
-enum class SimulationDensity // because ceres/eigen template function can only take constant in compile, so we use three sets of values
+enum class SimulationDensity
 {
 	LOW = 6,
 	MEDIUM = 10,
@@ -18,7 +18,8 @@ class BackEnd{
     public:
         typedef std::shared_ptr<BackEnd> Ptr;
         /*!
-        * \param[in] numPointSimulation: number of points to solve in the optimization problem. cathLength: length of the catheter, which is used as the contraint of the the problem
+        * \param[in] numPointSimulation: number of points to solve in the optimization problem. 
+        *                                cathLength: length of the catheter, which is used as the contraint of the the problem
         */
         BackEnd(int numPointSimualation, double cathLength);
 
@@ -41,9 +42,11 @@ class BackEnd{
         std::vector<double> Optimize(std::vector<double> tracker1, std::vector<double> tracker2);
 
 
-		const int		m_NumPointSimualation;	// number of points used for simulation, not including the ends measured by sensor For example, if 6 points are used, in total there are 6+2 points
+		const int		m_NumPointSimualation;	// number of points used for simulation, not including the ends measured by sensor.
+                                                // For example, if 6 points are used, in total there are 6+2 points
 		const double	m_CatheterLengthInMM;	// length of the catheter (Unit: mm)
-		double*			lastOptimalPoints;	// initial values for each iteration of the optimzation problem, which is the solution of last iteration, required by ceres-solver
+		double*			lastOptimalPoints;	    // The solution of last iteration, also the initiation for the current
+                                                // required by ceres-solver
 
         std::shared_ptr<CatheterPoints> m_CathPts;	// pointer to the catheter points object 
 

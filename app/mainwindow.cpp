@@ -44,7 +44,7 @@ void MainWindow::ShowLicenseDialog()
 {
     QMessageBox::information(
         this, "About",
-        "By Mingxin Zheng.\nSource code is available only for evaluation and non-commerical purposes");
+        "By Mingxin Zheng.\nSource code is only for skill evaluation and non-commerical purposes");
 }
 
 void MainWindow::ShowOpenConfigDialog()
