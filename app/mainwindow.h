@@ -33,48 +33,44 @@ public slots:
     //! Show the 'Open config file...' dialog
     void ShowOpenConfigDialog();
 
-    /**
-     * Play the dataset
-     */
+    //! Play/Fake-streaming the dataset 
     void Run();
 
-	/**
-	 * Pause playing dataset
-	 */
+	//! Pause playing dataset
 	void Pause();
 
-	/*!
-	* Updates every part of the GUI (called by ui refresh timer)
-	*/
+	//!Updates every part of the GUI (called by ui refresh timer)
 	void UpdateGUI();
 
-protected:
+private:
     /*! Open a config file
     * \param[in] fileName The name of the file including the path
     */
     void OpenConfigFile(const QString& fileName);
 
-	/*! Timer that refreshes the UI */
-	QTimer* m_UiRefreshTimer;
-
-private:
-	//! Initialize the scene
+	//! Initialize the scene and objects
 	bool Init();
+
+	//! Step to the next frame and update the scene
 	bool Step();
 
-    /*! Sets display mode (visibility of actors) according to the current state */
-    void SetState(AppState);
-    Ui::MainWindow* ui;
-    
-    CatheterPoints::Ptr m_CathPts = nullptr;    
-    BackEnd::Ptr m_BackEnd = nullptr;
+	/*! Sets display mode (visibility of actors) according to the current state
+	* \param[in] AppState_Unitialized, AppState_Idle, or AppState_Running
+	*/
+	void SetState(AppState state);
 
-    //! Dataset
-    std::string m_Source1FileName;
-    std::string m_Source2FileName;
-    DataSource m_Source1;
-    DataSource m_Source2;
-    AppState m_State;
+	Ui::MainWindow*		ui;						//Main UI
+	QTimer*				m_UiRefreshTimer;		// Timer that refreshes the UI
+    CatheterPoints::Ptr m_CathPts = nullptr;	// Catheter point class
+    BackEnd::Ptr		m_BackEnd = nullptr;	// Backend optimizer    
+    std::string			m_Source1FileName;		// Dataset 1 filename
+    std::string			m_Source2FileName;		// Dataset 2 filename
+    DataSource			m_Source1;				// Fake data source 1
+    DataSource			m_Source2;				// Fake data source 2
+    AppState			m_State;				// Internal state of the system
+	int					m_FrameRate = 30;			// frame rate of the system, default 30 Hz
+	int					m_KeyFrameInterval = 1;		// front end parameter
+	int					m_NumPointSimualation = 6;	// front end and back end parameter
 };
 
 #endif // MAINWINDOW_H

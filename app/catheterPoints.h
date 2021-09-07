@@ -11,7 +11,20 @@ class CatheterPoints
     typedef std::shared_ptr<CatheterPoints> Ptr;
 
     void SetSensor1(std::vector<double> sensor1) {m_Sensor1 = sensor1;};
-    void SetSensor2(std::vector<double> sensor2) {m_Sensor1 = sensor2;};
+    void SetSensor2(std::vector<double> sensor2) {m_Sensor2 = sensor2;};
+	void SetAllPoints(std::vector<double> allPoints) { m_AllPoints = allPoints; };
+
+	std::vector<double> GetTracker1()
+	{
+		std::unique_lock<std::mutex> lck(m_DataMutex);
+		return m_Sensor1;
+	};
+
+	std::vector<double> GetTracker2()
+	{
+		std::unique_lock<std::mutex> lck(m_DataMutex);
+		return m_Sensor2;
+	};
 
     std::vector<double> GetAllPoints()
     {

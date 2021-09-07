@@ -2,7 +2,6 @@
 #include "ui_mainwindow.h"
 
 #include <vector>
-#include <chrono>
 
 #include <QFile>
 #include <QFileDialog>
@@ -10,6 +9,7 @@
 #include <QTextStream>
 #include <QSettings>
 
+#include <chrono>
 //todo(mingxin): remove the debug
 #include <QDebug>
 
@@ -24,8 +24,13 @@ MainWindow::MainWindow(QWidget* parent)
 
 MainWindow::~MainWindow() 
 {
-	m_BackEnd->Stop();
-
+	// stop the back end
+	if (m_BackEnd != NULL)
+	{
+		m_BackEnd->Stop();
+	}
+	
+	// kill the timer
 	if (m_UiRefreshTimer != NULL)
 	{
 		m_UiRefreshTimer->stop();
@@ -45,7 +50,7 @@ void MainWindow::ShowLicenseDialog()
 
 void MainWindow::ShowOpenConfigDialog()
 {
-    // todo(mingxin): read txt for config
+    // read config file (.ini)
     QString fileName = QFileDialog::getOpenFileName(this, tr("Open file"), "",
         "Configuration Files (*.ini)");
 
@@ -86,6 +91,10 @@ void MainWindow::OpenConfigFile(const QString& fileName)
     m_Source1.SetSourceFilePath(src1.toUtf8().constData());
 	m_Source2.SetSourceFilePath(src2.toUtf8().constData());
 
+	m_FrameRate = settings.value("FrontEnd/FrameRate", 30).toInt();
+	m_KeyFrameInterval = settings.value("FrontEnd/KeyFrameInteval", 1).toInt();
+	m_NumPointSimualation = settings.value("FrontEnd/NumPointSimualation", 6).toInt();
+
     bool success = Init();
     
 	if (success)
@@ -96,17 +105,20 @@ void MainWindow::OpenConfigFile(const QString& fileName)
 
 bool MainWindow::Init()
 {
-    m_Source1.Init();
-	m_Source2.Init();
-
-	ui->frontEnd->ClearAll();
-	ui->frontEnd->Init();
-
 	m_CathPts = CatheterPoints::Ptr(new CatheterPoints);
 	m_BackEnd = BackEnd::Ptr(new BackEnd);
 
+	m_Source1.Init();
+	m_Source2.Init();
+
+	ui->frontEnd->ClearAll();
 	ui->frontEnd->SetCatheterPoints(m_CathPts);
 	ui->frontEnd->SetBackEnd(m_BackEnd);
+	ui->frontEnd->SetKeyFrameInterval(m_KeyFrameInterval);
+	ui->frontEnd->SetNumPointSimualation(m_NumPointSimualation);
+	ui->frontEnd->Init();
+
+	m_BackEnd->SetCatheterPoints(m_CathPts);
 
 	// Set up timer for refreshing UI
 	if (m_UiRefreshTimer != NULL)
@@ -119,8 +131,9 @@ bool MainWindow::Init()
 	m_UiRefreshTimer = new QTimer(this);
 	connect(m_UiRefreshTimer, SIGNAL(timeout()), this, SLOT(UpdateGUI()));
 
-	// Start Timer at inteval of 50ms
-	m_UiRefreshTimer->start(20);
+	// Start Timer at interval of 50ms
+	int interval = 1.0 / ((double) m_FrameRate);
+	m_UiRefreshTimer->start(interval);
     return true;
 }
 
@@ -151,14 +164,17 @@ bool MainWindow::Step()
     m_Source1.GetNextFrame(tracker1);
 	m_Source2.GetNextFrame(tracker2);
 	
+	m_CathPts->SetSensor1(tracker1);
+	m_CathPts->SetSensor2(tracker2);
+
 	// AddFrame: convert the numbers as correct inputs
-    ui->frontEnd->AddFrame(tracker1, tracker2); 
-	
+    ui->frontEnd->AddFrame(); 
+
 	auto t2 = std::chrono::steady_clock::now();
 	auto time_used =
 		std::chrono::duration_cast<std::chrono::duration<double>>(t2 - t1);
 	
-	qDebug() << "Instant Frame Rate: " << 1.0/time_used.count() << " Hz";
+	// qDebug() << "Instant Frame Rate: " << 1.0/time_used.count() << " Hz";
 
     return false;
 }
